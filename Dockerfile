@@ -29,12 +29,15 @@ RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list && \
 # 设置工作目录
 WORKDIR /workspace/GPT-SoVITS
 
-# 复制项目文件
-COPY . /workspace/GPT-SoVITS/
+# 首先只复制requirements.txt文件
+COPY requirements.txt /workspace/GPT-SoVITS/
 
-# 安装 Python 依赖
+# 安装 Python 依赖（这一层会被缓存，除非requirements.txt改变）
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
+
+# 然后复制其余的项目文件
+COPY . /workspace/GPT-SoVITS/
 
 # 创建必要的目录
 RUN mkdir -p output/CanKao output/tts_results

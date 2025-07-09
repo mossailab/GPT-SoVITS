@@ -11,6 +11,14 @@ import uuid
 import aiohttp
 from aiohttp import web
 
+# 从环境变量获取IP和端口配置
+HTTP_HOST = os.getenv('HTTP_HOST', '0.0.0.0')
+HTTP_PORT = int(os.getenv('HTTP_PORT', '8766'))
+WS_HOST = os.getenv('WS_HOST', '0.0.0.0')
+WS_PORT = int(os.getenv('WS_PORT', '8765'))
+PUBLIC_IP = os.getenv('PUBLIC_IP', '43.159.42.232')
+PUBLIC_PORT = int(os.getenv('PUBLIC_PORT', '8766'))
+
 # 固定模型路径（启动时由 inference_webui.py 读取）
 REF_AUDIO_PATH = "output/CanKao/CanKao.wav"
 REF_TEXT_PATH = "output/CanKao/CanKao_text.txt"
@@ -162,7 +170,7 @@ async def handle_connection(websocket):
                     continue
                 try:
                     mp3_id, file_size, text = run_tts(param)
-                    download_url = f"http://43.159.42.232:8766/download/{mp3_id}"
+                    download_url = f"http://{PUBLIC_IP}:{PUBLIC_PORT}/download/{mp3_id}"
                     await websocket.send(json.dumps({
                         "指令": "推理结果",
                         "参数": {
@@ -200,9 +208,9 @@ async def main():
     ])
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, '0.0.0.0', 8766)
+    site = web.TCPSite(runner, HTTP_HOST, HTTP_PORT)
     await site.start()
-    print("[Server] HTTP 服务器已启动，监听 http://0.0.0.0:8766")
+    print(f"[Server] HTTP 服务器已启动，监听 http://{HTTP_HOST}:{HTTP_PORT}")
 
     # 文件清理
     asyncio.create_task(cleanup_expired_files())
