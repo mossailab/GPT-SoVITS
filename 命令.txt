@@ -1,0 +1,7 @@
+conda activate gptsovits
+
+cd /d D:\AI\GPT-SoVITS-main
+
+python websocket_tts_server.py
+
+pip install g2p_en

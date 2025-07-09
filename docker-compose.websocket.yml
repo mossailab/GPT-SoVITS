@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  gpt-sovits-websocket:
+    build:
+      context: .
+      dockerfile: Dockerfile.websocket
+    container_name: gpt-sovits-websocket
+    ports:
+      - "8765:8765"  # WebSocket 端口
+      - "8766:8766"  # HTTP 下载端口
+    volumes:
+      # 挂载模型目录（如果有的话）
+      - ./GPT_weights:/workspace/GPT-SoVITS/GPT_weights:ro
+      - ./SoVITS_weights:/workspace/GPT-SoVITS/SoVITS_weights:ro
+      - ./GPT_SoVITS/pretrained_models:/workspace/GPT-SoVITS/GPT_SoVITS/pretrained_models:ro
+      # 挂载输出目录
+      - ./output:/workspace/GPT-SoVITS/output
+    environment:
+      - CUDA_VISIBLE_DEVICES=0  # 使用第一个 GPU，根据需要调整
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    networks:
+      - gpt-sovits-network
+
+networks:
+  gpt-sovits-network:
+    driver: bridge 
